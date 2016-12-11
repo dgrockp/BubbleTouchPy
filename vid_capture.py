@@ -38,6 +38,11 @@ def drawBubble(bubble):
 	for c in range(0,2):
 		frame[y_offset:y_offset+bubble.shape[0], x_offset:x_offset+bubble.shape[1], c] = bubble.img[:,:,c] * (bubble.img[:,:,c]/255.0) +  frame[y_offset:y_offset+bubble.shape[0], x_offset:x_offset+bubble.shape[1], c] * (1.0 - bubble.img[:,:,c]/255.0)
 
+##remover del frame la primera burbuja dibujada 
+def deleteBubble(x,y,w,h):
+	frame[y:h, x:w] = framecpy[y:h, x:w]
+	bubbles.pop(0)
+
 def isPosEnabled(x, y, w, h):
 	offset = 5
 	# if (x+w >= frame.shape[1]-offset) | (y+h >= frame.shape[0]-offset):
@@ -60,15 +65,16 @@ while(True):
 	#capturar frame por frame
 	ret, frame, = cap.read()
 	frame = cv2.resize(frame, (0,0), fx=2, fy=2)
-	print "bubble ", bubble.shape
-	print "frame ", frame.shape
+	framecpy = frame.copy()
+	# print "bubble ", bubble.shape
+	# print "frame ", frame.shape
 
 	for b in bubbles: #se dibujan las burbujas que han sido creadas
 		drawBubble(b)
 
 	if cv2.waitKey(33) == ord('q'):
 		break
-	elif cv2.waitKey(33) == ord('a'): #cada vez que se crea presiona la tecla 'a' se crea una burbuja
+	elif cv2.waitKey(33) == ord('a'): #cada vez que se presiona la tecla 'a' se crea una burbuja
 		enabled = False
 		w = bubble.shape[1]
 		h = bubble.shape[0]
@@ -80,6 +86,11 @@ while(True):
 			enabled = isPosEnabled(x,y,w,h)
 
 		bubbles.append(Bubble(bubble, x, y))
+	elif cv2.waitKey(33) == ord('d'):#cada vez que presiona la tecla 'd' se elimina una burbuja
+		if(len(bubbles) >0):
+			w = bubble.shape[1]
+			h = bubble.shape[0]
+			deleteBubble(bubbles[0].x,bubbles[0].y, w, h)
 		
 
 	#mostrar el frame resultante
