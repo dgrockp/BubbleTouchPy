@@ -83,6 +83,15 @@ def detectGreenColor():
 
 	return False, 0, 0
 
+def addBubbles():
+	n = random.choice(nb)
+	for i in range(n):
+		# se crean posiciones aleatorias para ubicar las burbujas en el frameflip
+		h,w,_ = bubble.shape
+		x = random.randint(5, frameflip.shape[1]-w-5)
+		y = random.randint(5+h, frameflip.shape[0]-h-5)
+		bubbles.append(Bubble(bubble, x, y))
+
 
 # def isPosEnabled(x, y, w, h):
 # 	offset = 5
@@ -95,36 +104,38 @@ def detectGreenColor():
 
 # 	return True
 	
+nb = [1,1,1,1,2,2,2,3,3]
 
 cap = cv2.VideoCapture(0)
 bubble = cv2.imread('res/bubble.jpg')
 setWhiteToBlack(bubble)
 
 bubbles = []
+start = True
 while(True):
 	#capturar frame por frame
 	ret, frame, = cap.read()
 	frame = cv2.resize(frame, (0,0), fx=2, fy=2)
 	frameflip = cv2.flip(frame.copy(),1)
 	frameflipcpy = frameflip.copy()
+
+	if start:
+		addBubbles()
+		start = False
 	
 	detected, cx, cy = detectGreenColor()
 	if detected:
 		isOn,b,i = isOnBubble(cx, cy)
 		if isOn:
 			deleteBubble(b, i)
+			if len(bubbles)<=5:
+				addBubbles()
 
 	for b in bubbles: #se dibujan las burbujas que han sido creadas
 		drawBubble(b)
 
-	if cv2.waitKey(33) == ord('q'):
+	if cv2.waitKey(1) & 0xFF == ord('q'):  # Indicamos que al pulsar "q" el programa se cierre
 		break
-	elif cv2.waitKey(33) == ord('a'): #cada vez que se presiona la tecla 'a' se crea una burbuja
-		# se crean posiciones aleatorias para ubicar las burbujas en el frameflip
-		h,w,_ = bubble.shape
-		x = random.randint(5, frameflip.shape[1]-w-5)
-		y = random.randint(5+h, frameflip.shape[0]-h-5)
-		bubbles.append(Bubble(bubble, x, y))
 
 	#mostrar el frameflip resultante
 	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)          
