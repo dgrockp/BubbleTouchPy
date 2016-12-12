@@ -10,15 +10,15 @@ def detect_color():
         ret, frame = cap.read()
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
 
-        #Definimos rango minimo y maximo del color Azul en [H,S,V] 
-        lower_blue = np.array([103,100,100])
-        upper_blue = np.array([130,255,255])
+        #Definimos rango minimo y maximo del color Verde en [H,S,V] 
+        lower_green = np.array([49,100,54])
+        upper_green = np.array([90,255,183])
 
         # Aqui mostramos la imagen en blanco o negro segun el rango de colores.
-        blue_mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        green_mask = cv2.inRange(hsv, lower_green, upper_green)
         # Limpiamos la imagen de imperfecciones con los filtros erode y dilate
-        blue_mask = cv2.erode(blue_mask, None, iterations=4)
-        blue_mask = cv2.dilate(blue_mask, None, iterations=4)
+        green_mask = cv2.erode(green_mask, None, iterations=4)
+        green_mask = cv2.dilate(green_mask, None, iterations=4)
 
         lower_red = np.array([160,100,100])
         upper_red = np.array([190,255,255])
@@ -29,12 +29,12 @@ def detect_color():
 
         
         # Localizamos la posicion del objeto
-        M_blue = cv2.moments(blue_mask)
+        M_green = cv2.moments(green_mask)
         cx = 0
         cy = 0
-        if M_blue['m00'] > 50000:
-            cx = int(M_blue['m10'] / M_blue['m00'])
-            cy = int(M_blue['m01'] / M_blue['m00'])
+        if M_green['m00'] > 50000:
+            cx = int(M_green['m10'] / M_green['m00'])
+            cy = int(M_green['m01'] / M_green['m00'])
             # Mostramos un circulo azul en la posicion en la que se encuentra el objeto
             cv2.circle(frame, (cx, cy), 20, (255, 0, 0), 2)
 
@@ -51,7 +51,7 @@ def detect_color():
 
         # Creamos las ventanas de salida y configuracion
         cv2.imshow('Salida', frame)
-        cv2.imshow('inRangeBlue', blue_mask)
+        cv2.imshow('inRangeBlue', green_mask)
         cv2.imshow('inRangeRed', red_mask)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # Indicamos que al pulsar "q" el programa se cierre
