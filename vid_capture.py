@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import random
-
+import time
 
 class Bubble:
 
@@ -11,6 +11,12 @@ class Bubble:
 		self.x = x
 		self.y = y
 		self.cont = 0
+
+class Player:
+
+	def __init__(self, color):
+		self.color = color
+		self.nbubbles = 0
 
 #convierte el fondo blanco de la imagen a negro
 def setWhiteToBlack(bubble):
@@ -44,7 +50,6 @@ def isOnBubble(cx, cy):
 	for b in bubbles:
 		h,w,_ = b.shape
 		if (cx >= b.x and cx<= b.x+w) and (cy >= b.y and cy<= b.y+h):
-			print cx,cy,b.x,b.y,w,h
 			return True, b, i
 		
 		i = i+1
@@ -57,26 +62,29 @@ def deleteBubble(b,index):
 	frameflip[b.y:h, b.x:w] = frameflipcpy[b.y:h, b.x:w]
 	bubbles.pop(index)
 
-#detecta un objeto de color verde, dibuja un circulo sobre el y retorna la posicion 
+#retorna la posicion del objeto color verde   
 def detectGreenColor():
+	return getColorPos(frameflip.copy(), lower_green, upper_green)
 
-	hsv = cv2.cvtColor(frameflip, cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
+#retorna la posicion del objeto color rojo   
+def detectRedColor():
+	return getColorPos(frameflip.copy(), lower_red, upper_red)
+	
+#detecta un objeto de un determinado color, dibuja un circulo sobre el y retorna la posicion
+def getColorPos(framecp, lowerColor, upperColor):
+	hsv = cv2.cvtColor(framecp, cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
    	
-   	#Definimos rango minimo y maximo del color Verde en [H,S,V] 
-	lower_green = np.array([49,100,54])
-	upper_green = np.array([90,255,183])
-
     # Aqui mostramos la imagen en blanco o negro segun el rango de colores.
-	green_mask = cv2.inRange(hsv, lower_green, upper_green)
+	mask = cv2.inRange(hsv, lowerColor, upperColor)
     # Limpiamos la imagen de imperfecciones con los filtros erode y dilate
-	green_mask = cv2.erode(green_mask, None, iterations=4)
-	green_mask = cv2.dilate(green_mask, None, iterations=4)
+	mask = cv2.erode(mask, None, iterations=4)
+	mask = cv2.dilate(mask, None, iterations=4)
 
     # Localizamos la posicion del objeto
-	M_green = cv2.moments(green_mask)
-	if M_green['m00'] > 50000:
-		cx = int(M_green['m10'] / M_green['m00'])
-		cy = int(M_green['m01'] / M_green['m00'])
+	M = cv2.moments(mask)
+	if M['m00'] > 50000:
+		cx = int(M['m10'] / M['m00'])
+		cy = int(M['m01'] / M['m00'])
 		# Mostramos un circulo azul en la posicion en la que se encuentra el objeto
 		cv2.circle(frameflip, (cx, cy), 20, (255, 0, 0), 2)
 		return True, cx, cy
@@ -106,13 +114,22 @@ def addBubbles():
 	
 nb = [1,1,1,1,2,2,2,3,3]
 
+lower_green = np.array([49,100,54])
+upper_green = np.array([90,255,183])
+lower_red = np.array([160,100,100])
+upper_red = np.array([190,255,255])
+
 cap = cv2.VideoCapture(0)
 bubble = cv2.imread('res/bubble.jpg')
 setWhiteToBlack(bubble)
 
+pg = Player('verde')
+pr = Player('rojo')
 bubbles = []
 start = True
-while(True):
+start_t = time.time()
+total_t = 0
+while total_t <=30 :
 	#capturar frame por frame
 	ret, frame, = cap.read()
 	frame = cv2.resize(frame, (0,0), fx=2, fy=2)
@@ -123,11 +140,20 @@ while(True):
 		addBubbles()
 		start = False
 	
-	detected, cx, cy = detectGreenColor()
-	if detected:
-		isOn,b,i = isOnBubble(cx, cy)
+	detectedg, cxg, cyg = detectGreenColor()
+	detectedr, cxr, cyr = detectRedColor()
+	if detectedg:
+		isOn,b,i = isOnBubble(cxg, cyg)
 		if isOn:
 			deleteBubble(b, i)
+			pg.nbubbles = pg.nbubbles + 1
+			if len(bubbles)<=5:
+				addBubbles()
+	if detectedr:
+		isOn,b,i = isOnBubble(cxr, cyr)
+		if isOn:
+			deleteBubble(b, i)
+			pr.nbubbles = pr.nbubbles + 1
 			if len(bubbles)<=5:
 				addBubbles()
 
@@ -141,7 +167,11 @@ while(True):
 	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)          
 	cv2.setWindowProperty("frameflip",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 	cv2.imshow('frameflip', frameflip)
+	total_t = time.time()-start_t 
 
+print "Burbujas reventadas Jugador1: "+ str(pg.nbubbles)
+print "Burbujas reventadas Jugador2: "+ str(pr.nbubbles)
+print "Tiempo transcurrido: " + str(int(total_t)) + " seg"
 
 cap.release()
 cv2.destroyAllWindows() 
