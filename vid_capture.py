@@ -66,9 +66,32 @@ def deleteBubble(b,index):
 def detectGreenColor():
 	return getColorPos(frameflip.copy(), lower_green, upper_green)
 
+#retorna la posicion del objeto color verde   
+def detectBlueColor():
+	return getColorPos(frameflip.copy(), lower_blue, upper_blue)
+
 #retorna la posicion del objeto color rojo   
 def detectRedColor():
-	return getColorPos(frameflip.copy(), lower_red, upper_red)
+	#return getColorPos(frameflip.copy(), lower_red, upper_red)
+	hsv = cv2.cvtColor(frameflip.copy(), cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
+   	
+	red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+	red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+	red_mask = cv2.bitwise_or(red_mask1,red_mask2)
+	red_mask = cv2.erode(red_mask, None, iterations=11)
+	red_mask = cv2.dilate(red_mask, None, iterations=11)
+
+	M_red = cv2.moments(red_mask)
+	cx = 0
+	cy = 0
+	if M_red['m00'] > 50000:
+		cx = int(M_red['m10'] / M_red['m00'])
+		cy = int(M_red['m01'] / M_red['m00'])
+		# Mostramos un circulo rojo en la posicion en la que se encuentra el objeto
+		cv2.circle(frameflip, (cx, cy), 20, (0, 0, 255), 2)
+		return True, cx, cy
+
+	return False, 0, 0
 	
 #detecta un objeto de un determinado color, dibuja un circulo sobre el y retorna la posicion
 def getColorPos(framecp, lowerColor, upperColor):
@@ -77,8 +100,8 @@ def getColorPos(framecp, lowerColor, upperColor):
     # Aqui mostramos la imagen en blanco o negro segun el rango de colores.
 	mask = cv2.inRange(hsv, lowerColor, upperColor)
     # Limpiamos la imagen de imperfecciones con los filtros erode y dilate
-	mask = cv2.erode(mask, None, iterations=4)
-	mask = cv2.dilate(mask, None, iterations=4)
+	mask = cv2.erode(mask, None, iterations=6)
+	mask = cv2.dilate(mask, None, iterations=6)
 
     # Localizamos la posicion del objeto
 	M = cv2.moments(mask)
@@ -86,7 +109,7 @@ def getColorPos(framecp, lowerColor, upperColor):
 		cx = int(M['m10'] / M['m00'])
 		cy = int(M['m01'] / M['m00'])
 		# Mostramos un circulo azul en la posicion en la que se encuentra el objeto
-		cv2.circle(frameflip, (cx, cy), 20, (255, 0, 0), 2)
+		cv2.circle(frameflip, (cx, cy), 20, (0, 255, 0), 2)
 		return True, cx, cy
 
 	return False, 0, 0
@@ -116,8 +139,12 @@ nb = [1,1,1,1,2,2,2,3,3]
 
 lower_green = np.array([49,100,54])
 upper_green = np.array([90,255,183])
-lower_red = np.array([160,100,100])
-upper_red = np.array([190,255,255])
+lower_blue = np.array([110,100,70])
+upper_blue = np.array([130,255,255])
+lower_red1 = np.array([0,0,50])
+upper_red1 = np.array([8,255,255])
+lower_red2 = np.array([175,70,50])
+upper_red2 = np.array([180,255,255])
 
 cap = cv2.VideoCapture(0)
 bubble = cv2.imread('res/bubble.jpg')
@@ -129,7 +156,7 @@ bubbles = []
 start = True
 start_t = time.time()
 total_t = 0
-while total_t <=30 :
+while total_t <=90 :
 	#capturar frame por frame
 	ret, frame, = cap.read()
 	frame = cv2.resize(frame, (0,0), fx=2, fy=2)
@@ -142,6 +169,8 @@ while total_t <=30 :
 	
 	detectedg, cxg, cyg = detectGreenColor()
 	detectedr, cxr, cyr = detectRedColor()
+	#detectedr, cxr, cyr = detectBlueColor()
+
 	if detectedg:
 		isOn,b,i = isOnBubble(cxg, cyg)
 		if isOn:
