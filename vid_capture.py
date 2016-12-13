@@ -67,16 +67,16 @@ def detectGreenColor():
 	return getColorPos(frameflip.copy(), lower_green, upper_green, (0,255,0))
 
 #retorna la posicion del objeto color rojo   
-def detectRedColor():
-	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
+#def detectRedColor():
+#	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
 
 #retorna la posicion del objeto color azul   
 def detectBlueColor():
 	return getColorPos(frameflip.copy(), lower_blue, upper_blue, (255,0,0))
 
 # #retorna la posicion del objeto color rojo   
-# def detectRedColor():
-# 	#return getColorPos(frameflip.copy(), lower_red, upper_red)
+def detectRedColor():
+ 	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
 # 	hsv = cv2.cvtColor(frameflip.copy(), cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
    	
 # 	red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
@@ -148,6 +148,13 @@ def showNumOfBubbles(player):
 
 	cv2.putText(frameflip,text,pos, font, 2,color,2,cv2.LINE_AA)
 
+def showTime(restante):
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	color = (255,0,0)
+	pos = (20,50)
+	text = "Segundos restantes: " + str(int(restante))
+	cv2.putText(frameflip, text, pos, font, 2, color, 2, cv2.LINE_AA)
+
 
 # def isPosEnabled(x, y, w, h):
 # 	offset = 5
@@ -179,12 +186,14 @@ bubble = cv2.imread('res/bubble.jpg')
 setWhiteToBlack(bubble)
 
 p1 = Player('verde')
-p2 = Player('azul')
+p2 = Player('rojo')
+#p2 = Player('azul')
 bubbles = []
 start = True
 start_t = time.time()
 total_t = 0
-while total_t <=90 :
+duracion = 90
+while total_t <=duracion :
 	#capturar frame por frame
 	ret, frame, = cap.read()
 	frame = cv2.resize(frame, (0,0), fx=2, fy=2)
@@ -196,8 +205,8 @@ while total_t <=90 :
 		start = False
 	
 	detectedc1, cxg, cyg = detectGreenColor()
-	#detectedc2, cxr, cyr = detectRedColor()
-	detectedc2, cxr, cyr = detectBlueColor()
+	detectedc2, cxr, cyr = detectRedColor()
+	#detectedc2, cxr, cyr = detectBlueColor()
 
 	if detectedc1:
 		isOn,b,i = isOnBubble(cxg, cyg)
@@ -222,11 +231,15 @@ while total_t <=90 :
 
 	showNumOfBubbles(p1)
 	showNumOfBubbles(p2)
+	
+	total_t = time.time()-start_t
+	showTime(duracion-total_t)
 	#mostrar el frameflip resultante
 	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)          
 	cv2.setWindowProperty("frameflip",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 	cv2.imshow('frameflip', frameflip)
-	total_t = time.time()-start_t 
+	
+	
 
 print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
 print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
