@@ -64,37 +64,41 @@ def deleteBubble(b,index):
 
 #retorna la posicion del objeto color verde   
 def detectGreenColor():
-	return getColorPos(frameflip.copy(), lower_green, upper_green)
-
-#retorna la posicion del objeto color verde   
-def detectBlueColor():
-	return getColorPos(frameflip.copy(), lower_blue, upper_blue)
+	return getColorPos(frameflip.copy(), lower_green, upper_green, (0,255,0))
 
 #retorna la posicion del objeto color rojo   
 def detectRedColor():
-	#return getColorPos(frameflip.copy(), lower_red, upper_red)
-	hsv = cv2.cvtColor(frameflip.copy(), cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
+	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
+
+#retorna la posicion del objeto color azul   
+def detectBlueColor():
+	return getColorPos(frameflip.copy(), lower_blue, upper_blue, (255,0,0))
+
+# #retorna la posicion del objeto color rojo   
+# def detectRedColor():
+# 	#return getColorPos(frameflip.copy(), lower_red, upper_red)
+# 	hsv = cv2.cvtColor(frameflip.copy(), cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
    	
-	red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-	red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-	red_mask = cv2.bitwise_or(red_mask1,red_mask2)
-	red_mask = cv2.erode(red_mask, None, iterations=11)
-	red_mask = cv2.dilate(red_mask, None, iterations=11)
+# 	red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+# 	red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+# 	red_mask = cv2.bitwise_or(red_mask1,red_mask2)
+# 	red_mask = cv2.erode(red_mask, None, iterations=11)
+# 	red_mask = cv2.dilate(red_mask, None, iterations=11)
 
-	M_red = cv2.moments(red_mask)
-	cx = 0
-	cy = 0
-	if M_red['m00'] > 50000:
-		cx = int(M_red['m10'] / M_red['m00'])
-		cy = int(M_red['m01'] / M_red['m00'])
-		# Mostramos un circulo rojo en la posicion en la que se encuentra el objeto
-		cv2.circle(frameflip, (cx, cy), 20, (0, 0, 255), 2)
-		return True, cx, cy
+# 	M_red = cv2.moments(red_mask)
+# 	cx = 0
+# 	cy = 0
+# 	if M_red['m00'] > 50000:
+# 		cx = int(M_red['m10'] / M_red['m00'])
+# 		cy = int(M_red['m01'] / M_red['m00'])
+# 		# Mostramos un circulo rojo en la posicion en la que se encuentra el objeto
+# 		cv2.circle(frameflip, (cx, cy), 20, (0, 0, 255), 2)
+# 		return True, cx, cy
 
-	return False, 0, 0
+# 	return False, 0, 0
 	
 #detecta un objeto de un determinado color, dibuja un circulo sobre el y retorna la posicion
-def getColorPos(framecp, lowerColor, upperColor):
+def getColorPos(framecp, lowerColor, upperColor, color):
 	hsv = cv2.cvtColor(framecp, cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
    	
     # Aqui mostramos la imagen en blanco o negro segun el rango de colores.
@@ -109,7 +113,7 @@ def getColorPos(framecp, lowerColor, upperColor):
 		cx = int(M['m10'] / M['m00'])
 		cy = int(M['m01'] / M['m00'])
 		# Mostramos un circulo azul en la posicion en la que se encuentra el objeto
-		cv2.circle(frameflip, (cx, cy), 20, (0, 255, 0), 2)
+		cv2.circle(frameflip, (cx, cy), 20, color, 2)
 		return True, cx, cy
 
 	return False, 0, 0
@@ -122,6 +126,27 @@ def addBubbles():
 		x = random.randint(5, frameflip.shape[1]-w-5)
 		y = random.randint(5+h, frameflip.shape[0]-h-5)
 		bubbles.append(Bubble(bubble, x, y))
+
+def showNumOfBubbles(player):
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	color = (255,255,255)
+	pos = (0,0)
+	h,w,_ = frame.shape
+	text = ""
+	if player.color == "verde":
+		color = (0,255,0)
+		pos = (50, h-50)
+		text = "Jugador1: " + str(player.nbubbles)
+	elif player.color == "rojo":
+		color = (0,0,255)
+		pos = (w-450, h-50)
+		text = "Jugador2: " + str(player.nbubbles)
+	elif player.color == "azul":
+		color = (255,0,0)
+		pos = (w-450, h-50)
+		text = "Jugador2: " + str(player.nbubbles)
+
+	cv2.putText(frameflip,text,pos, font, 2,color,2,cv2.LINE_AA)
 
 
 # def isPosEnabled(x, y, w, h):
@@ -141,17 +166,20 @@ lower_green = np.array([49,100,54])
 upper_green = np.array([90,255,183])
 lower_blue = np.array([110,100,70])
 upper_blue = np.array([130,255,255])
-lower_red1 = np.array([0,0,50])
-upper_red1 = np.array([8,255,255])
-lower_red2 = np.array([175,70,50])
-upper_red2 = np.array([180,255,255])
+lower_red = np.array([160,100,100])
+upper_red = np.array([190,255,255])
+# upper_red1 = np.array([8,255,255])
+# lower_red1 = np.array([0,0,50])
+# upper_red1 = np.array([8,255,255])
+# lower_red2 = np.array([175,70,50])
+# upper_red2 = np.array([180,255,255])
 
 cap = cv2.VideoCapture(0)
 bubble = cv2.imread('res/bubble.jpg')
 setWhiteToBlack(bubble)
 
-pg = Player('verde')
-pr = Player('rojo')
+p1 = Player('verde')
+p2 = Player('azul')
 bubbles = []
 start = True
 start_t = time.time()
@@ -167,22 +195,22 @@ while total_t <=90 :
 		addBubbles()
 		start = False
 	
-	detectedg, cxg, cyg = detectGreenColor()
-	detectedr, cxr, cyr = detectRedColor()
-	#detectedr, cxr, cyr = detectBlueColor()
+	detectedc1, cxg, cyg = detectGreenColor()
+	#detectedc2, cxr, cyr = detectRedColor()
+	detectedc2, cxr, cyr = detectBlueColor()
 
-	if detectedg:
+	if detectedc1:
 		isOn,b,i = isOnBubble(cxg, cyg)
 		if isOn:
 			deleteBubble(b, i)
-			pg.nbubbles = pg.nbubbles + 1
+			p1.nbubbles = p1.nbubbles + 1
 			if len(bubbles)<=5:
 				addBubbles()
-	if detectedr:
+	if detectedc2:
 		isOn,b,i = isOnBubble(cxr, cyr)
 		if isOn:
 			deleteBubble(b, i)
-			pr.nbubbles = pr.nbubbles + 1
+			p2.nbubbles = p2.nbubbles + 1
 			if len(bubbles)<=5:
 				addBubbles()
 
@@ -192,14 +220,16 @@ while total_t <=90 :
 	if cv2.waitKey(1) & 0xFF == ord('q'):  # Indicamos que al pulsar "q" el programa se cierre
 		break
 
+	showNumOfBubbles(p1)
+	showNumOfBubbles(p2)
 	#mostrar el frameflip resultante
 	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)          
 	cv2.setWindowProperty("frameflip",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 	cv2.imshow('frameflip', frameflip)
 	total_t = time.time()-start_t 
 
-print "Burbujas reventadas Jugador1: "+ str(pg.nbubbles)
-print "Burbujas reventadas Jugador2: "+ str(pr.nbubbles)
+print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
+print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
 print "Tiempo transcurrido: " + str(int(total_t)) + " seg"
 
 cap.release()
