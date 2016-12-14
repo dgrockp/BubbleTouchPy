@@ -11,23 +11,27 @@ def detect_color():
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
 
         #Definimos rango minimo y maximo del color Verde en [H,S,V] 
-        lower_green = np.array([110,100,70])
-        upper_green = np.array([130,255,255])
+        #lower_blue = np.array([110,100,70])
+        #upper_blue = np.array([130,255,255])
+        lower_green = np.array([49,100,54])
+        upper_green = np.array([90,255,183])
 
         # Aqui mostramos la imagen en blanco o negro segun el rango de colores.
         green_mask = cv2.inRange(hsv, lower_green, upper_green)
         # Limpiamos la imagen de imperfecciones con los filtros erode y dilate
         green_mask = cv2.erode(green_mask, None, iterations=6)
         green_mask = cv2.dilate(green_mask, None, iterations=6)
-
-        lower_red1 = np.array([0,70,50])
-        upper_red1 = np.array([8,255,255])
-        lower_red2 = np.array([170,70,50])
-        upper_red2 = np.array([180,255,255])
-
-        red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-        red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-        red_mask = cv2.bitwise_or(red_mask1,red_mask2)
+		
+		#lower_red1 = np.array([0,70,50])
+        #upper_red1 = np.array([8,255,255])
+        #lower_red2 = np.array([170,70,50])
+        #upper_red2 = np.array([180,255,255])
+        lower_red = np.array([160,100,100])
+        upper_red = np.array([190,255,255])
+        #red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+        #red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+		#red_mask = cv2.bitwise_or(red_mask1,red_mask2)
+        red_mask  = cv2.inRange(hsv, lower_red, upper_red)
         red_mask = cv2.erode(red_mask, None, iterations=10)
         red_mask = cv2.dilate(red_mask, None, iterations=10)
 
@@ -55,7 +59,7 @@ def detect_color():
 
         # Creamos las ventanas de salida y configuracion
         cv2.imshow('Salida', frame)
-        cv2.imshow('inRangeBlue', green_mask)
+        cv2.imshow('inRangeGreen', green_mask)
         cv2.imshow('inRangeRed', red_mask)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # Indicamos que al pulsar "q" el programa se cierre
