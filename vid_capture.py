@@ -127,6 +127,31 @@ def addBubbles():
 		y = random.randint(5+h, frameflip.shape[0]-h-5)
 		bubbles.append(Bubble(bubble, x, y))
 
+#muestra los puntajes al finalizar el juego
+"""
+print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
+print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
+print "Tiempo transcurrido: " + str(int(total_t)) + " seg"
+"""		
+def showGameOver(player):
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	color = (255,255,255)
+	pos = (0,0)
+	h,w,_ = frame.shape
+	p1 = ""
+	p2 = ""
+	if player.color == "verde":
+		pos = (50, h-130)
+		text = "Burbujas reventadas J1: " + str(player.nbubbles)
+	elif player.color == "rojo":
+		pos = (50, h-50)
+		text = "Burbujas reventadas J2: " + str(player.nbubbles)
+	elif player.color == "azul":
+		pos = (50, h-50)
+		text = "Burbujas reventadas J2: " + str(player.nbubbles)
+		
+	cv2.putText(final,text,pos, font, 2,color,2,cv2.LINE_AA)
+
 def showNumOfBubbles(player):
 	font = cv2.FONT_HERSHEY_SIMPLEX
 	color = (255,255,255)
@@ -151,7 +176,7 @@ def showNumOfBubbles(player):
 def showTime(restante):
 	font = cv2.FONT_HERSHEY_SIMPLEX
 	color = (255,0,0)
-	pos = (20,50)
+	pos = (20,60)
 	text = "Segundos restantes: " + str(int(restante))
 	cv2.putText(frameflip, text, pos, font, 2, color, 2, cv2.LINE_AA)
 
@@ -192,7 +217,7 @@ bubbles = []
 start = True
 start_t = time.time()
 total_t = 0
-duracion = 90
+duracion = 35
 while total_t <=duracion :
 	#capturar frame por frame
 	ret, frame, = cap.read()
@@ -239,11 +264,29 @@ while total_t <=duracion :
 	cv2.setWindowProperty("frameflip",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 	cv2.imshow('frameflip', frameflip)
 	
-	
+
+final = cv2.imread('res/fin-juego.jpg')
+#cv2.namedWindow("final", cv2.WND_PROP_FULLSCREEN)
+#cv2.setWindowProperty("final",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+cap.release()
+cv2.destroyAllWindows()
+
+cv2.namedWindow("final", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("final",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+showGameOver(p1)
+showGameOver(p2)
+cv2.imshow('final', final)
+
+
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
 
 print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
 print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
 print "Tiempo transcurrido: " + str(int(total_t)) + " seg"
 
-cap.release()
-cv2.destroyAllWindows() 
+
+
