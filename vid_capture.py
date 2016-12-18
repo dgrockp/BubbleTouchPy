@@ -50,10 +50,8 @@ def isOnBubble(cx, cy):
 	for b in bubbles:
 		h,w,_ = b.shape
 		if (cx >= b.x and cx<= b.x+w) and (cy >= b.y and cy<= b.y+h):
-			return True, b, i
-		
+			return True, b, i	
 		i = i+1
-
 	return False, 0, 0
 
 #remover del frameflip un bubble
@@ -66,36 +64,13 @@ def deleteBubble(b,index):
 def detectGreenColor():
 	return getColorPos(frameflip.copy(), lower_green, upper_green, (0,255,0))
 
-#retorna la posicion del objeto color rojo   
-#def detectRedColor():
-#	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
-
-#retorna la posicion del objeto color azul   
+#retorna la posicion del objeto color azul
 def detectBlueColor():
 	return getColorPos(frameflip.copy(), lower_blue, upper_blue, (255,0,0))
 
 # #retorna la posicion del objeto color rojo   
 def detectRedColor():
  	return getColorPos(frameflip.copy(), lower_red, upper_red, (0,0,255))
-# 	hsv = cv2.cvtColor(frameflip.copy(), cv2.COLOR_BGR2HSV)  # Convertimos imagen a HSV
-   	
-# 	red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-# 	red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-# 	red_mask = cv2.bitwise_or(red_mask1,red_mask2)
-# 	red_mask = cv2.erode(red_mask, None, iterations=11)
-# 	red_mask = cv2.dilate(red_mask, None, iterations=11)
-
-# 	M_red = cv2.moments(red_mask)
-# 	cx = 0
-# 	cy = 0
-# 	if M_red['m00'] > 50000:
-# 		cx = int(M_red['m10'] / M_red['m00'])
-# 		cy = int(M_red['m01'] / M_red['m00'])
-# 		# Mostramos un circulo rojo en la posicion en la que se encuentra el objeto
-# 		cv2.circle(frameflip, (cx, cy), 20, (0, 0, 255), 2)
-# 		return True, cx, cy
-
-# 	return False, 0, 0
 	
 #detecta un objeto de un determinado color, dibuja un circulo sobre el y retorna la posicion
 def getColorPos(framecp, lowerColor, upperColor, color):
@@ -128,11 +103,6 @@ def addBubbles():
 		bubbles.append(Bubble(bubble, x, y))
 
 #muestra los puntajes al finalizar el juego
-"""
-print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
-print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
-print "Tiempo transcurrido: " + str(int(total_t)) + " seg"
-"""		
 def showGameOver(player):
 	font = cv2.FONT_HERSHEY_SIMPLEX
 	color = (255,255,255)
@@ -180,26 +150,17 @@ def showTime(restante):
 	text = "Segundos restantes: " + str(int(restante))
 	cv2.putText(frameflip, text, pos, font, 2, color, 2, cv2.LINE_AA)
 
-
-# def isPosEnabled(x, y, w, h):
-# 	offset = 5
-# 	if (x+w >= frameflip.shape[1]-offset) or (y+h >= frameflip.shape[0]-offset):
-# 		return False
-
-# 	for b in bubbles:
-# 		if ((x+w >= b.x-offset) and x <= b.x+b.shape[1]+offset) and ((y+h >= b.y-offset) and y <= b.y+b.shape[0]+offset):
-# 			return False
-
-# 	return True
 	
 nb = [1,1,1,1,2,2,2,3,3]
 
+#rango de colores para la deteccion
 lower_green = np.array([49,100,54])
 upper_green = np.array([90,255,183])
-lower_blue = np.array([110,100,70])
-upper_blue = np.array([130,255,255])
 lower_red = np.array([160,100,100])
 upper_red = np.array([190,255,255])
+
+#lower_blue = np.array([110,100,70])
+#upper_blue = np.array([130,255,255])
 # upper_red1 = np.array([8,255,255])
 # lower_red1 = np.array([0,0,50])
 # upper_red1 = np.array([8,255,255])
@@ -260,14 +221,12 @@ while total_t <=duracion :
 	total_t = time.time()-start_t
 	showTime(duracion-total_t)
 	#mostrar el frameflip resultante
-	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)          
+	cv2.namedWindow("frameflip", cv2.WND_PROP_FULLSCREEN)
 	cv2.setWindowProperty("frameflip",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 	cv2.imshow('frameflip', frameflip)
 	
 
 final = cv2.imread('res/fin-juego.jpg')
-#cv2.namedWindow("final", cv2.WND_PROP_FULLSCREEN)
-#cv2.setWindowProperty("final",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 cap.release()
 cv2.destroyAllWindows()
 
@@ -277,12 +236,8 @@ showGameOver(p1)
 showGameOver(p2)
 cv2.imshow('final', final)
 
-
-
-
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
 
 print "Burbujas reventadas Jugador1: "+ str(p1.nbubbles)
 print "Burbujas reventadas Jugador2: "+ str(p2.nbubbles)
